@@ -15,22 +15,22 @@ if (Get-Command logparser.exe) {
 
     $lpquery = @"
     SELECT
-        COUNT(ImagePath, LaunchString) as ct,
-        ImagePath,
-        LaunchString
+        COUNT(Image\u0020Path, Launch\u0020String) as ct,
+        Image\u0020Path,
+        Launch\u0020String
     FROM
-        *autorunsc.tsv
+        *autorunsc.csv
     WHERE
-        Publisher not like '(Verified)%' and
-        (ImagePath not like 'File not found%')
+        Signer not like '(Verified)%' and
+        (Image\u0020Path not like 'File not found%')
     GROUP BY
-        ImagePath,
-        LaunchString
+        Image\u0020Path,
+        Launch\u0020String
     ORDER BY
         ct ASC
 "@
 
-    & logparser -stats:off -i:csv -dtlines:0 -fixedsep:on -rtp:-1 "$lpquery"
+    & logparser -stats:off -i:csv -dtlines:0 -rtp:-1 "$lpquery"
 
 } else {
     $ScriptName = [System.IO.Path]::GetFileName($MyInvocation.ScriptName)

@@ -6,7 +6,7 @@ Pulls frequency of autoruns based on ImagePath, LaunchString and MD5
 tuple where the publisher is not verified (unsigned code) and the 
 ImagePath is not 'File not found'
 
-This on also includes the time stamp, which may break aggregation, but
+This one also includes the time stamp, which may break aggregation, but
 provides some useful information.
 
 This script expects files matching the *autorunsc.txt pattern to be in
@@ -19,29 +19,29 @@ DATADIR Autorunsc
 if (Get-Command logparser.exe) {
     $lpquery = @"
     SELECT
-        COUNT(ImagePath, LaunchString, MD5) as ct,
-        ImagePath,
-        LaunchString,
+        COUNT(Image\u0020Path, Launch\u0020String, MD5) as ct,
+        Image\u0020Path,
+        Launch\u0020String,
         MD5,
         Time,
-        Publisher
+        Signer
     FROM
-        *autorunsc.tsv
+        *autorunsc.csv
     WHERE
-        ImagePath is not null and
-        Publisher not like '(Verified)%' and
-        (ImagePath not like 'File not found%')
+        Image\u0020Path is not null and
+        Signer not like '(Verified)%' and
+        (Image\u0020Path not like 'File not found%')
     GROUP BY
-        ImagePath,
-        LaunchString,
+        Image\u0020Path,
+        Launch\u0020String,
         MD5,
         Time,
-        Publisher
+        Signer
     ORDER BY
         ct ASC
 "@
 
-    & logparser -i:csv -dtlines:0 -fixedsep:on -rtp:-1 "$lpquery"
+    & logparser -i:csv -dtlines:0 -rtp:-1 "$lpquery"
 
 } else {
     $ScriptName = [System.IO.Path]::GetFileName($MyInvocation.ScriptName)

@@ -12,9 +12,17 @@ directory
 DATADIR PrefetchListing
 #>
 
-if (Get-Command logparser.exe) {
+if (-Not (Test-Path -Path "*PrefetchListing.tsv")) {
+    return
+}
 
-    $lpquery = @"
+if (-Not (Get-Command logparser.exe)) {
+    $ScriptName = [System.IO.Path]::GetFileName($MyInvocation.ScriptName)
+    Write-Host "${ScriptName} requires logparser.exe in the path."
+    return
+}
+
+$lpquery = @"
     SELECT
         FullName,
         LastWriteTimeUtc,
@@ -24,10 +32,4 @@ if (Get-Command logparser.exe) {
     ORDER BY
         LastWriteTimeUtc Desc
 "@
-
-    & logparser -stats:off -i:csv -fixedsep:on -dtlines:0 -rtp:-1 $lpquery
-
-} else {
-    $ScriptName = [System.IO.Path]::GetFileName($MyInvocation.ScriptName)
-    "${ScriptName} requires logparser.exe in the path."
-}
+& logparser -stats:off -i:csv -fixedsep:on -dtlines:0 -rtp:-1 $lpquery

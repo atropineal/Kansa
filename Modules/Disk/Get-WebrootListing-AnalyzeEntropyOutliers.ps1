@@ -93,55 +93,58 @@ function Get-EntropyOutliers {
     }
 }
 
-if (Get-Command logparser.exe) {
-    $lp_query = @"
-        SELECT
-            EXTRACT_EXTENSION(FullName) AS Extension,
-            AVG(ALL TO_REAL(Entropy)) AS AvgEntropy
-        FROM
-            *WebRootListing.tsv
-        GROUP BY
-            EXTRACT_EXTENSION(FullName)
-        HAVING
-            AvgEntropy > 0.0
-"@
-
-    # Get file extensions with entropy (excludes directories).
-    $lp_results = & logparser -stats:off -i:csv -o:csv -dtlines:0 -fixedsep:on "$lp_query" | ConvertFrom-Csv
-
-    # Find the outliers.
-    $outliers = Get-EntropyOutliers $lp_results
-
-    if(!$NoStacking) {
-        # Stack-rank the outliers.
-        $lpquery = @"
-            SELECT 
-                COUNT(FullName,
-                    Length,
-                    Entropy,
-                    EntropyAvg) as ct,
-                FullName,
-                Length,
-                Entropy,
-                EntropyAvg
-            FROM STDIN
-            GROUP BY
-                FullName,
-                Length,
-                Entropy,
-                EntropyAvg
-            ORDER By
-                ct ASC
-"@
-
-        $outliers = $outliers | ConvertTo-Csv -NoTypeInformation | 
-            & logparser -stats:off -i:csv -dtlines:0 -rtp:-1 "$lpquery"
-    }
-
-    $outliers
-    
-} else {
-    $ScriptName = [System.IO.Path]::GetFileName($MyInvocation.ScriptName)
-    "${ScriptName} requires logparser.exe in the path."
+if (-Not (Test-Path -Path "*WebRootListing.tsv")) {
+    return
 }
 
+if (-Not (Get-Command logparser.exe)) {
+    $ScriptName = [System.IO.Path]::GetFileName($MyInvocation.ScriptName)
+    Write-Host "${ScriptName} requires logparser.exe in the path."
+    return
+}
+    
+$lp_query = @"
+    SELECT
+        EXTRACT_EXTENSION(FullName) AS Extension,
+        AVG(ALL TO_REAL(Entropy)) AS AvgEntropy
+    FROM
+        *WebRootListing.tsv
+    GROUP BY
+        EXTRACT_EXTENSION(FullName)
+    HAVING
+        AvgEntropy > 0.0
+"@
+
+# Get file extensions with entropy (excludes directories).
+$lp_results = & logparser -stats:off -i:csv -o:csv -dtlines:0 -fixedsep:on "$lp_query" | ConvertFrom-Csv
+
+# Find the outliers.
+$outliers = Get-EntropyOutliers $lp_results
+
+if(!$NoStacking) {
+    # Stack-rank the outliers.
+    $lpquery = @"
+        SELECT 
+            COUNT(FullName,
+                Length,
+                Entropy,
+                EntropyAvg) as ct,
+            FullName,
+            Length,
+            Entropy,
+            EntropyAvg
+        FROM STDIN
+        GROUP BY
+            FullName,
+            Length,
+            Entropy,
+            EntropyAvg
+        ORDER By
+            ct ASC
+"@
+
+    $outliers = $outliers | ConvertTo-Csv -NoTypeInformation | 
+        & logparser -stats:off -i:csv -dtlines:0 -rtp:-1 "$lpquery"
+}
+
+$outliers

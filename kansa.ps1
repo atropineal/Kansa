@@ -559,7 +559,7 @@ Param(
     Write-Debug "Entering $($MyInvocation.MyCommand)"
     $Error.Clear()
     if ($AnalysisPath) {
-        $Module = ".\Analysis\" + $Module
+        $Module = ".\Modules\" + $Module
     }
 
     if (Test-Path($Module)) {
@@ -1041,12 +1041,12 @@ function Set-KansaPath {
     $kansapath  = Split-Path $Invocation.MyCommand.Path
     $Paths      = ($env:Path).Split(";")
 
-    if (-not($Paths -match [regex]::Escape("$kansapath\Analysis"))) {
+    if (-not($Paths -match [regex]::Escape("$kansapath\Modules"))) {
         # We want this one and it's not covered below, so...
-        $env:Path = $env:Path + ";$kansapath\Analysis"
+        $env:Path = $env:Path + ";$kansapath\Modules"
     }
 
-    $AnalysisPaths = (ls -Recurse "$kansapath\Analysis" | Where-Object { $_.PSIsContainer } | Select-Object -ExpandProperty FullName)
+    $AnalysisPaths = (ls -Recurse "$kansapath\Modules" | Where-Object { $_.PSIsContainer } | Select-Object -ExpandProperty FullName)
     $AnalysisPaths | ForEach-Object {
         if (-not($Paths -match [regex]::Escape($_))) {
             $env:Path = $env:Path + ";$_"
@@ -1064,7 +1064,7 @@ function Set-KansaPath {
 function Get-Analysis {
 <#
 .SYNOPSIS
-Runs analysis scripts as specified in .\Analyais\Analysis.conf
+Runs analysis scripts as specified in .\Modules\Analysis.conf
 Saves output to AnalysisReports folder under the output path
 Fails silently, but logs errors to Error.log file
 #>
@@ -1079,7 +1079,10 @@ Param(
 
     if (Get-Command -Name Logparser.exe) {
         $AnalysisScripts = @()
-        $AnalysisScripts = Get-Content "$StartingPath\Analysis\Analysis.conf" | Foreach-Object { $_.Trim() } | ? { $_ -gt 0 -and (!($_.StartsWith("#"))) }
+
+#        $AnalysisScripts = Get-Content "$StartingPath\Modules\Analysis.conf" | Foreach-Object { $_.Trim() } | ? { $_ -gt 0 -and (!($_.StartsWith("#"))) }
+        $AnalysisScripts = Get-ChildItem -Path "$StartingPath\Modules" -Depth 2 -Filter "*-Analyze*.ps1" | % { $_.Directory.Name + "\" + $_.Name }
+#        Write-Host $AnalysisScripts
 
         $AnalysisOutPath = $OutputPath + "\AnalysisReports\"
         [void] (New-Item -Path $AnalysisOutPath -ItemType Directory -Force)
@@ -1089,23 +1092,25 @@ Param(
         $AnalysisScripts | Foreach-Object { $AnalysisScript = $_
             $DirectivesHash = Get-Directives $AnalysisScript -AnalysisPath
             $DataDir = $($DirectivesHash.Get_Item("DATADIR"))
-            if ($DataDir) {
-                if (Test-Path "$OutputPath$DataDir") {
+#            if ($DataDir) {
+#                if (Test-Path "$OutputPath$DataDir") {
                     Push-Location
-                    Set-Location "$OutputPath$DataDir"
+#                    Set-Location "$OutputPath$DataDir"
+                    Set-Location "$OutputPath"
                     Write-Verbose "Running analysis script: ${AnalysisScript}"
                     $AnalysisFile = ((((($AnalysisScript -split "\\")[1]) -split "Get-")[1]) -split ".ps1")[0]
                     # As of this writing, all analysis output files are tsv
-                    & "$StartingPath\Analysis\${AnalysisScript}" | Set-Content -Encoding $Encoding ($AnalysisOutPath + $AnalysisFile + ".tsv")
+                    & "$StartingPath\Modules\${AnalysisScript}" | Set-Content -Encoding $Encoding ($AnalysisOutPath + $AnalysisFile + ".tsv")
                     Pop-Location
-                } else {
-                    "WARNING: Analysis: No data found for ${AnalysisScript}." | Add-Content -Encoding $Encoding $ErrorLog
-                    Continue
-                }
-            } else {
-                "WARNING: Analysis script, .\Analysis\${AnalysisScript}, missing # DATADIR directive, skipping analysis." | Add-Content -Encoding $Encoding $ErrorLog
-                Continue
-            }        
+#                } else {
+#                    Write-Host $DataDir
+#                    "WARNING: Analysis: No data found for ${AnalysisScript}." | Add-Content -Encoding $Encoding $ErrorLog
+#                    Continue
+#                }
+#            } else {
+#                "WARNING: Analysis script, .\Modules\${AnalysisScript}, missing # DATADIR directive, skipping analysis." | Add-Content -Encoding $Encoding $ErrorLog
+#                Continue
+#            }        
         }
     } else {
         "Kansa could not find logparser.exe in path. Skipping Analysis." | Add-Content -Encoding $Encoding -$ErrorLog
@@ -1210,7 +1215,7 @@ $Modules = Get-Modules -ModulePath $ModulePath
 if ($ListAnalysis) {
     # User provided ListAnalysis switch so exit
     # after returning a list of analysis scripts
-    List-Modules ".\Analysis\"
+    List-Modules ".\Modules\"
     Exit
 }
 

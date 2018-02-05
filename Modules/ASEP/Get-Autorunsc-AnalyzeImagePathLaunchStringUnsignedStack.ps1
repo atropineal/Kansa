@@ -11,9 +11,17 @@ current working directory.
 DATADIR Autorunsc
 #>
 
-if (Get-Command logparser.exe) {
+if (-Not (Test-Path -Path "*-autorunsc.txt")) {
+    return
+}
 
-    $lpquery = @"
+if (-Not (Get-Command logparser.exe)) {
+    $ScriptName = [System.IO.Path]::GetFileName($MyInvocation.ScriptName)
+    Write-Host "${ScriptName} requires logparser.exe in the path."
+    return
+} 
+
+$lpquery = @"
     SELECT
         COUNT(Image\u0020Path, Launch\u0020String) as ct,
         Image\u0020Path,
@@ -29,11 +37,4 @@ if (Get-Command logparser.exe) {
     ORDER BY
         ct ASC
 "@
-
-    & logparser -stats:off -i:csv -dtlines:0 -rtp:-1 "$lpquery"
-
-} else {
-    $ScriptName = [System.IO.Path]::GetFileName($MyInvocation.ScriptName)
-    "${ScriptName} requires logparser.exe in the path."
-}
-
+& logparser -stats:off -i:csv -dtlines:0 -rtp:-1 "$lpquery"

@@ -17,8 +17,17 @@ Process data matching *AMHealthStatus.tsv in pwd logparser.exe in path
 DATADIR AMHealthStatus
 #>
 
-if (Get-Command logparser.exe) {
-    $lpquery = @"
+if (-Not (Test-Path -Path "*AMHealthStatus.tsv")) {
+    return
+}
+
+if (-Not (Get-Command logparser.exe)) {
+    $ScriptName = [System.IO.Path]::GetFileName($MyInvocation.ScriptName)
+    Write-Host "${ScriptName} requires logparser.exe in the path."
+    return
+}
+
+$lpquery = @"
     SELECT count (
         AntispywareEnabled, 
         AntispywareSignatureAge, 
@@ -86,10 +95,5 @@ if (Get-Command logparser.exe) {
     ORDER BY
         CNT ASC
 "@
+& logparser -stats:off -i:csv -dtlines:0 -fixedsep:on -rtp:-1 "$lpquery"
 
-    & logparser -stats:off -i:csv -dtlines:0 -fixedsep:on -rtp:-1 "$lpquery"
-
-} else {
-    $ScriptName = [System.IO.Path]::GetFileName($MyInvocation.ScriptName)
-    "${ScriptName} requires logparser.exe in the path."
-}

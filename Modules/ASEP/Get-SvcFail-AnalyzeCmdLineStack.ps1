@@ -11,9 +11,17 @@ the current working directory.
 DATADIR SvcFail
 #>
 
-if (Get-Command logparser.exe) {
+if (-Not (Test-Path -Path "*SvcFail.csv")) {
+    return
+}
 
-    $lpquery = @"
+if (-Not (Get-Command logparser.exe)) {
+    $ScriptName = [System.IO.Path]::GetFileName($MyInvocation.ScriptName)
+    Write-Host "${ScriptName} requires logparser.exe in the path."
+    return
+}
+
+$lpquery = @"
     SELECT
         COUNT(To_Lowercase(CmdLine)) as ct, 
         To_Lowercase(CmdLine) as CmdLineLC
@@ -24,10 +32,4 @@ if (Get-Command logparser.exe) {
     ORDER BY
         ct ASC
 "@
-
-    & logparser -stats:off -i:csv -dtlines:0 -rtp:-1 $lpquery
-
-} else {
-    $ScriptName = [System.IO.Path]::GetFileName($MyInvocation.ScriptName)
-    "${ScriptName} requires logparser.exe in the path."
-}
+& logparser -stats:off -i:csv -dtlines:0 -rtp:-1 $lpquery

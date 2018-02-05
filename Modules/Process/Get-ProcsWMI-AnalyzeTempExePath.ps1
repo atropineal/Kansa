@@ -13,8 +13,17 @@ logparser.exe in path
 DATADIR ProcsWMI
 #>
 
-if (Get-Command logparser.exe) {
-    $lpquery = @"
+if (-Not (Test-Path -Path "*ProcsWMI.tsv")) {
+    return
+}
+
+if (-Not (Get-Command logparser.exe)) {
+    $ScriptName = [System.IO.Path]::GetFileName($MyInvocation.ScriptName)
+    Write-Host "${ScriptName} requires logparser.exe in the path."
+    return
+}
+
+$lpquery = @"
     SELECT DISTINCT
         CreationDate,
         ProcessId,
@@ -33,10 +42,4 @@ if (Get-Command logparser.exe) {
         CreationDate,
         ProcessId ASC
 "@
-
-    & logparser -stats:off -i:csv -dtlines:0 -fixedsep:on -rtp:-1 "$lpquery"
-
-} else {
-    $ScriptName = [System.IO.Path]::GetFileName($MyInvocation.ScriptName)
-    "${ScriptName} requires logparser.exe in the path."
-}
+& logparser -stats:off -i:csv -dtlines:0 -fixedsep:on -rtp:-1 "$lpquery"

@@ -11,9 +11,17 @@ Handle data matching *Handle.tsv in pwd
 DATADIR Handle
 #>
 
+if (-Not (Test-Path -Path "*Handle.tsv")) {
+    return
+}
 
-if (Get-Command logparser.exe) {
-    $lpquery = @"
+if (-Not (Get-Command logparser.exe)) {
+    $ScriptName = [System.IO.Path]::GetFileName($MyInvocation.ScriptName)
+    Write-Host "${ScriptName} requires logparser.exe in the path."
+    return
+}
+
+$lpquery = @"
     SELECT
         COUNT(ProcessName,
         Owner) as ct,
@@ -27,10 +35,4 @@ if (Get-Command logparser.exe) {
     ORDER BY
         ct ASC
 "@
-
-    & logparser -stats:off -i:csv -dtlines:0 -fixedsep:on -rtp:-1 "$lpquery"
-
-} else {
-    $ScriptName = [System.IO.Path]::GetFileName($MyInvocation.ScriptName)
-    "${ScriptName} requires logparser.exe in the path."
-}
+& logparser -stats:off -i:csv -dtlines:0 -fixedsep:on -rtp:-1 "$lpquery"

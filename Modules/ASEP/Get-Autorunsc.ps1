@@ -25,7 +25,7 @@ binary that this script depends on.
 OUTPUT tsv
 BINDEP .\Modules\bin\Autorunsc.exe
 
-!!THIS SCRIPT ASSUMES AUTORUNSC.EXE WILL BE IN $ENV:SYSTEMROOT!!
+!!THIS SCRIPT ASSUMES AUTORUNSC.EXE WILL BE IN THE PATH SOMEWHERE!!
 
 Autorunsc output is a mess. Some of it is quoted csv, some is just csv.
 This script parses it pretty well, but there are still some things that
@@ -34,10 +34,12 @@ troublesome entries, one in particular is for items that don't have
 time stamps.
 #>
 
-if (Test-Path "$env:SystemRoot\Autorunsc.exe") {
-    & $env:SystemRoot\Autorunsc.exe /accepteula -a * -c -h -s '*' -nobanner 2> $null | ConvertFrom-Csv | ForEach-Object {
+$command = "autorunsc.exe"
+if (Get-Command $command -ErrorAction SilentlyContinue) { 
+    & $command /accepteula -a * -c -h -s '*' -nobanner 2> $null | ConvertFrom-Csv | ForEach-Object {
         $_
     }
-} else {
-    Write-Error "Autorunsc.exe not found in $env:SystemRoot."
+} 
+else {
+    Write-Error "$command not found in path"
 }

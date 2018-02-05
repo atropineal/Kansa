@@ -675,7 +675,7 @@ Param(
             }
         }
                             
-        [void] (New-Item -Path $OutputPath -name ($GetlessMod + $ArgFileName) -ItemType Directory)
+#        [void] (New-Item -Path $OutputPath -name ($GetlessMod + $ArgFileName) -ItemType Directory)
         $Job.ChildJobs | Foreach-Object { $ChildJob = $_
             $Recpt = Receive-Job $ChildJob
             
@@ -688,7 +688,8 @@ Param(
 
             # Now that we know our hostname, let's double check our path length, if it's too long, we'll write an error
             # Max path is 260 characters, if we're over 256, we can't accomodate an extension
-            $Outfile = $OutputPath + $GetlessMod + $ArgFileName + "\" + $ChildJob.Location + "-" + $GetlessMod + $ArgFileName
+#            $Outfile = $OutputPath + $GetlessMod + $ArgFileName + "\" + $ChildJob.Location + "-" + $GetlessMod + $ArgFileName
+            $Outfile = $OutputPath + "\" + $ChildJob.Location + "-" + $GetlessMod + $ArgFileName
             if ($Outfile.length -gt 256) {
                 "ERROR: ${GetlessMod}'s output path length exceeds 260 character limit. Can't write the output to disk for $($ChildJob.Location)." | Add-Content -Encoding $Encoding $ErrorLog
                 Return
@@ -1129,12 +1130,12 @@ $StartingPath = Get-Location | Select-Object -ExpandProperty Path
 # Create timestamped output path. Write transcript and error log #
 # to output path. Keep this first in the script so we can catch  #
 # errors in the error log of the output directory. We may create #
-$Runtime = ([String] (Get-Date -Format yyyyMMddHHmmss))
-$OutputPath = $StartingPath + "\Output_$Runtime\"
+$Runtime = ([String] (Get-Date -Format yyyy-MM-dd-HH-mm-ss))
+$OutputPath = $StartingPath + "\Output\$Runtime\"
 [void] (New-Item -Path $OutputPath -ItemType Directory -Force) 
 
 If ($Transcribe) {
-    $TransFile = $OutputPath + ([string] (Get-Date -Format yyyyMMddHHmmss)) + ".log"
+    $TransFile = $OutputPath + ([string] (Get-Date -Format yyyy-MM-dd-HH-mm-ss)) + ".log"
     [void] (Start-Transcript -Path $TransFile)
 }
 Set-Variable -Name ErrorLog -Value ($OutputPath + "Error.Log") -Scope Script

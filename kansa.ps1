@@ -260,20 +260,18 @@ Param(
     [Parameter(Mandatory=$False,Position=12)]
         [Switch]$ListAnalysis,
     [Parameter(Mandatory=$False,Position=13)]
-        [Switch]$Analysis,
-    [Parameter(Mandatory=$False,Position=14)]
         [Switch]$Transcribe,
-    [Parameter(Mandatory=$False,Position=15)]
+    [Parameter(Mandatory=$False,Position=14)]
         [Switch]$Quiet=$False,
-    [Parameter(Mandatory=$False,Position=16)]
+    [Parameter(Mandatory=$False,Position=15)]
         [Switch]$UseSSL,
-    [Parameter(Mandatory=$False,Position=17)]
+    [Parameter(Mandatory=$False,Position=16)]
         [ValidateRange(0,65535)]
         [uint16]$Port=5985,
-    [Parameter(Mandatory=$False,Position=18)]
+    [Parameter(Mandatory=$False,Position=17)]
         [ValidateSet("Basic","CredSSP","Default","Digest","Kerberos","Negotiate","NegotiateWithImplicitCredential")]
         [String]$Authentication="Kerberos",
-    [Parameter(Mandatory=$false,Position=19)]
+    [Parameter(Mandatory=$false,Position=18)]
         [int32]$JSONDepth="10"
 )
 
@@ -1056,7 +1054,7 @@ function Set-KansaPath {
 function Get-Analysis {
 <#
 .SYNOPSIS
-Runs analysis scripts as specified in .\Modules\Analysis.conf
+Runs analysis scripts
 Saves output to AnalysisReports folder under the output path
 Fails silently, but logs errors to Error.log file
 #>
@@ -1229,10 +1227,8 @@ if ($TargetList) {
 Get-TargetData -Targets $Targets -Modules $Modules -Credential $Credential -ThrottleLimit $ThrottleLimit
 # Done gathering data. #
 
-# Are we running analysis scripts? #
-if ($Analysis) {
-    Get-Analysis $OutputPath $StartingPath
-}
+# We always run all applicable analysis scripts #
+Get-Analysis $OutputPath $StartingPath
 # Done running analysis #
 
 

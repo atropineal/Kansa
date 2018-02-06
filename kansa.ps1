@@ -212,7 +212,6 @@ Returns a list of all the modules found under the default modules path.
 Kansa.ps1 -ListAnalysis
 Returns a list of all analysis scripts found under the Analysis path.
 #>
-
 [CmdletBinding()]
 Param(
     [Parameter(Mandatory=$False,Position=0)]
@@ -256,7 +255,6 @@ Param(
     [Parameter(Mandatory=$false,Position=17)]
         [int32]$JSONDepth="10"
 )
-
 # Opening with a Try so the Finally block at the bottom will always call
 # the Exit-Script function and clean up things as needed.
 Try {
@@ -533,7 +531,6 @@ Param(
     }
 }
 
-
 function Get-TargetData {
 <#
 .SYNOPSIS
@@ -628,7 +625,6 @@ Param(
             }
         }
                             
-#        [void] (New-Item -Path $OutputPath -name ($GetlessMod + $ArgFileName) -ItemType Directory)
         $Job.ChildJobs | Foreach-Object { $ChildJob = $_
             $Recpt = Receive-Job $ChildJob
             
@@ -641,7 +637,6 @@ Param(
 
             # Now that we know our hostname, let's double check our path length, if it's too long, we'll write an error
             # Max path is 260 characters, if we're over 256, we can't accomodate an extension
-#            $Outfile = $OutputPath + $GetlessMod + $ArgFileName + "\" + $ChildJob.Location + "-" + $GetlessMod + $ArgFileName
             $Outfile = $OutputPath + "\" + $ChildJob.Location + "-" + $GetlessMod + $ArgFileName
             if ($Outfile.length -gt 256) {
                 "ERROR: ${GetlessMod}'s output path length exceeds 260 character limit. Can't write the output to disk for $($ChildJob.Location)." | Add-Content -Encoding $Encoding $ErrorLog
@@ -667,19 +662,6 @@ Param(
                     $Outfile = $Outfile + ".xml"
                     $Recpt | Export-Clixml $Outfile -Encoding $Encoding
                 }
-                <# Following output formats are no longer supported in Kansa
-                "*bin" {
-                    $Outfile = $Outfile + ".bin"
-                    $Recpt | Set-Content -Encoding Byte $Outfile
-                }
-                "*zip" {
-                    # Compression should be done in the collector
-                    # Default collector template has a function
-                    # for compressing data as an example
-                    $Outfile = $Outfile + ".zip"
-                    $Recpt | Set-Content -Encoding Byte $Outfile
-                }
-                #>
                 default {
                     $Outfile = $Outfile + ".csv"
                     $Recpt | Export-Csv -NoTypeInformation -Encoding $Encoding $Outfile
@@ -696,7 +678,6 @@ Param(
                 Remove-Bindep -Targets $Targets -Module $Module -Bindep $bindep -Credential $Credential
             }
         }
-
     }
     Remove-PSSession $PSSessions
 
@@ -770,7 +751,6 @@ Param(
     }
     Write-Debug "Exiting $($MyInvocation.MyCommand)"    
 }
-
 
 function Send-File
 {
@@ -914,7 +894,6 @@ function Send-File
 	
 }
 
-
 function Remove-Bindep {
 <#
 .SYNOPSIS
@@ -1013,7 +992,6 @@ function Set-KansaPath {
     Write-Debug "Exiting $($MyInvocation.MyCommand)"    
 }
 
-
 function Get-Analysis {
 <#
 .SYNOPSIS
@@ -1032,43 +1010,23 @@ Param(
 
     if (Get-Command -Name Logparser.exe) {
         $AnalysisScripts = @()
-
-#        $AnalysisScripts = Get-Content "$StartingPath\Modules\Analysis.conf" | Foreach-Object { $_.Trim() } | ? { $_ -gt 0 -and (!($_.StartsWith("#"))) }
         $AnalysisScripts = Get-ChildItem -Path "$StartingPath\Modules" -Depth 2 -Filter "*-Analyze*.ps1" | % { $_.Directory.Name + "\" + $_.Name }
-#        Write-Host $AnalysisScripts
-
         $AnalysisOutPath = $OutputPath + "\AnalysisReports\"
         [void] (New-Item -Path $AnalysisOutPath -ItemType Directory -Force)
-
-#        # Get our DATADIR directive
         $DirectivesHash  = @{}
         $AnalysisScripts | Foreach-Object { $AnalysisScript = $_
             $DirectivesHash = Get-Directives $AnalysisScript -AnalysisPath
-#            $DataDir = $($DirectivesHash.Get_Item("DATADIR"))
-#            if ($DataDir) {
-#                if (Test-Path "$OutputPath$DataDir") {
-                    Push-Location
-#                    Set-Location "$OutputPath$DataDir"
-                    Set-Location "$OutputPath"
-#                    Write-Verbose "Running analysis script: ${AnalysisScript}"
-                    $AnalysisFile = ((((($AnalysisScript -split "\\")[1]) -split "Get-")[1]) -split ".ps1")[0]
-                    # As of this writing, all analysis output files are tsv
-                    & "$StartingPath\Modules\${AnalysisScript}" | Set-Content -Encoding $Encoding ($AnalysisOutPath + $AnalysisFile + ".tsv")
-                    Pop-Location
-#                } else {
-#                    Write-Host $DataDir
-#                    "WARNING: Analysis: No data found for ${AnalysisScript}." | Add-Content -Encoding $Encoding $ErrorLog
-#                    Continue
-#                }
-#            } else {
-#                "WARNING: Analysis script, .\Modules\${AnalysisScript}, missing # DATADIR directive, skipping analysis." | Add-Content -Encoding $Encoding $ErrorLog
-#                Continue
-#            }        
+            Push-Location
+            Set-Location "$OutputPath"
+            $AnalysisFile = ((((($AnalysisScript -split "\\")[1]) -split "Get-")[1]) -split ".ps1")[0]
+            # As of this writing, all analysis output files are tsv
+            & "$StartingPath\Modules\${AnalysisScript}" | Set-Content -Encoding $Encoding ($AnalysisOutPath + $AnalysisFile + ".tsv")
+            Pop-Location
         }
     } else {
         "Kansa could not find logparser.exe in path. Skipping Analysis." | Add-Content -Encoding $Encoding -$ErrorLog
     }
-    # Non-terminating errors can be checked via
+    # Non-terminating errors can be checked
     if ($Error) {
         # Write the $Error to the $Errorlog
         $Error | Add-Content -Encoding $Encoding $ErrorLog
@@ -1076,7 +1034,6 @@ Param(
     }
     Write-Debug "Exiting $($MyInvocation.MyCommand)"    
 } # End Get-Analysis
-
 
 # Do not stop or report errors as a matter of course.   #
 # Instead write them out the error.log file and report  #
@@ -1103,7 +1060,6 @@ if (Test-Path($ErrorLog)) {
 }
 # Done setting up output. #
 
-
 # Set the output encoding #
 if ($Encoding) {
     Set-Variable -Name Encoding -Value $Encoding -Scope Script
@@ -1111,7 +1067,6 @@ if ($Encoding) {
     Set-Variable -Name Encoding -Value "Unicode" -Scope Script
 }
 # End set output encoding #
-
 
 # Sanity check some parameters #
 Write-Debug "Sanity checking parameters"
@@ -1132,7 +1087,6 @@ if ($Exit) {
 Write-Debug "Parameter sanity check complete."
 # End paramter sanity checks #
 
-
 # Update the user's path with Kansa Analysis paths. #
 # Exit if that's all they wanted us to do.          #
 Set-KansaPath
@@ -1143,12 +1097,10 @@ if ($UpdatePath) {
 }
 # Done updating the path. #
 
-
 # If we're -Debug, show some settings. #
 Write-Debug "`$ModulePath is ${ModulePath}."
 Write-Debug "`$OutputPath is ${OutputPath}."
 Write-Debug "`$ServerList is ${TargetList}."
-
 
 # Get our modules #
 if ($ListModules) {
@@ -1174,7 +1126,6 @@ if ($TargetList) {
 }
 # Done getting targets #
 
-
 # Finally, let's gather some data. #
 Get-TargetData -Targets $Targets -Modules $Modules -Credential $Credential -ThrottleLimit $ThrottleLimit
 # Done gathering data. #
@@ -1183,13 +1134,11 @@ Get-TargetData -Targets $Targets -Modules $Modules -Credential $Credential -Thro
 Get-Analysis $OutputPath $StartingPath
 # Done running analysis #
 
-
 # Code to remove binaries from remote hosts
 if ($rmbin) {
     Remove-Bindep -Targets $Targets -Modules $Modules -Credential $Credential
 }
 # Done removing binaries #
-
 
 # Clean up #
 Exit

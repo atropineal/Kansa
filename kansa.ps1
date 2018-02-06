@@ -257,21 +257,21 @@ Param(
         [Switch]$UpdatePath,
     [Parameter(Mandatory=$False,Position=11)]
         [Switch]$ListModules,
+#    [Parameter(Mandatory=$False,Position=12)]
+#        [Switch]$ListAnalysis,
     [Parameter(Mandatory=$False,Position=12)]
-        [Switch]$ListAnalysis,
-    [Parameter(Mandatory=$False,Position=13)]
         [Switch]$Transcribe,
-    [Parameter(Mandatory=$False,Position=14)]
+    [Parameter(Mandatory=$False,Position=13)]
         [Switch]$Quiet=$False,
-    [Parameter(Mandatory=$False,Position=15)]
+    [Parameter(Mandatory=$False,Position=14)]
         [Switch]$UseSSL,
-    [Parameter(Mandatory=$False,Position=16)]
+    [Parameter(Mandatory=$False,Position=15)]
         [ValidateRange(0,65535)]
         [uint16]$Port=5985,
-    [Parameter(Mandatory=$False,Position=17)]
+    [Parameter(Mandatory=$False,Position=16)]
         [ValidateSet("Basic","CredSSP","Default","Digest","Kerberos","Negotiate","NegotiateWithImplicitCredential")]
         [String]$Authentication="Kerberos",
-    [Parameter(Mandatory=$false,Position=18)]
+    [Parameter(Mandatory=$false,Position=17)]
         [int32]$JSONDepth="10"
 )
 
@@ -1199,16 +1199,6 @@ if ($ListModules) {
 # List-Modules command above.
 $Modules = Get-Modules -ModulePath $ModulePath
 # Done getting modules #
-
-
-# Get our analysis scripts #
-if ($ListAnalysis) {
-    # User provided ListAnalysis switch so exit
-    # after returning a list of analysis scripts
-    List-Modules ".\Modules\"
-    Exit
-}
-
 
 # Get our targets. #
 if ($TargetList) {

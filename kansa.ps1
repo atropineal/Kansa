@@ -91,8 +91,7 @@ For example, the directive for Get-AutorunscDeep.ps1 as of this writing is
 BINDEP .\Modules\bin\Autorunsc.exe
 
 If your required binaries are already present on each target and in the 
-path where the modules expect them to be, you can omit the -Pushbin 
-flag and save the step of copying binaries.
+path, you can omit the -Pushbin flag and save the step of copying binaries.
 
 .PARAMETER Rmbin
 An optional switch for removing binaries that may have been pushed to
@@ -517,9 +516,7 @@ Param(
     }
 
     if (Test-Path($Module)) {
-        
         $DirectiveHash = @{}
-
         Get-Content $Module | Select-String -CaseSensitive -Pattern "BINDEP|DATADIR" | Foreach-Object { $Directive = $_
             if ( $Directive -match "(^BINDEP|^# BINDEP) (.*)" ) {
                 $DirectiveHash.Add("BINDEP", $($matches[2]))
@@ -589,7 +586,7 @@ Param(
                 # Fix for Issue 146, originally suggested by sc2pyro.
                 foreach ($PSSession in $PSSessions)
                 {
-                    $RemoteWindir = Invoke-Command -Session $PSSession -ScriptBlock { Get-ChildItem -Force env: | Where-Object { $_.Name -match "windir" } | Select-Object -ExpandProperty value }
+                    $RemoteWindir = Invoke-Command -Session $PSSession -ScriptBlock { (Get-ChildItem -Force env: | Where-Object { $_.Name -match "windir" } | Select-Object -ExpandProperty value) + "\Kansa" }
                     $null = Send-File -Path (ls $bindep).FullName -Destination $RemoteWindir -Session $PSSession
                 }
             }
@@ -914,17 +911,20 @@ Param(
         [System.Management.Automation.PSCredential]$Credential
 )
     Write-Debug "Entering $($MyInvocation.MyCommand)"
+    Write-Host $Targets
+    Write-Host $Modules
+    Write-Host $Binde
     $Error.Clear()
     $Bindep = $Bindep.Substring($Bindep.LastIndexOf("\") + 1)
     Write-Verbose "Attempting to remove ${Bindep} from remote hosts."
     $Targets | Foreach-Object { $Target = $_
         if ($Credential) {
             [void] (New-PSDrive -PSProvider FileSystem -Name "KansaDrive" -Root "\\$Target\ADMIN$" -Credential $Credential)
-            Remove-Item "KansaDrive:\$Bindep" 
+            Remove-Item "KansaDrive:\Kansa\$Bindep" 
             [void] (Remove-PSDrive -Name "KansaDrive")
         } else {
             [void] (New-PSDrive -PSProvider FileSystem -Name "KansaDrive" -Root "\\$Target\ADMIN$")
-            Remove-Item "KansaDrive:\$Bindep"
+            Remove-Item "KansaDrive:\Kansa\$Bindep"
             [void] (Remove-PSDrive -Name "KansaDrive")
         }
         
@@ -1133,12 +1133,6 @@ Get-TargetData -Targets $Targets -Modules $Modules -Credential $Credential -Thro
 # We always run all applicable analysis scripts #
 Get-Analysis $OutputPath $StartingPath
 # Done running analysis #
-
-# Code to remove binaries from remote hosts
-if ($rmbin) {
-    Remove-Bindep -Targets $Targets -Modules $Modules -Credential $Credential
-}
-# Done removing binaries #
 
 # Clean up #
 Exit

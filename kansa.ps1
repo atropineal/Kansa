@@ -61,11 +61,6 @@ An optional parameter, the name of a single system to collect data from.
 .PARAMETER TargetCount
 An optional parameter that specifies the maximum number of targets.
 
-In the absence of the TargetList and / or Target arguments, Kansa will 
-use Remote System Administration Tools (a separate installed package) 
-to query Active Directory and will build a list of hosts to target 
-automatically.
-
 .PARAMETER Credential
 An optional credential that the script will use for execution. Use the
 $Credential = Get-Credential convention to populate a suitable variable.
@@ -117,17 +112,6 @@ coming back to the data for analysis.
 An optional switch that lists the available modules. Useful for
 constructing a modules.conf file. Kansa exits after listing.
 You'll likely want to sort the according to the order of volatility.
-
-.PARAMETER ListAnalysis
-An optional switch that lists the available analysis scripts. Useful 
-for constructing an analysis.conf file. Kansa exits after listing. If 
-you use this switch to build an analysis.conf file, you'll likely want 
-to edit the list so you're only running the analysis scripts you want 
-to run.
-
-.PARAMETER Analysis
-An optional switch that causes Kansa to run automated analysis based on
-the contents of the Analysis\Analysis.conf file.
 
 .PARAMETER Transcribe
 An optional flag that causes Start-Transcript to run at the start
@@ -257,8 +241,6 @@ Param(
         [Switch]$UpdatePath,
     [Parameter(Mandatory=$False,Position=11)]
         [Switch]$ListModules,
-#    [Parameter(Mandatory=$False,Position=12)]
-#        [Switch]$ListAnalysis,
     [Parameter(Mandatory=$False,Position=12)]
         [Switch]$Transcribe,
     [Parameter(Mandatory=$False,Position=13)]
@@ -419,25 +401,6 @@ Param(
     }
     Write-Verbose "Running modules:`n$(($ModuleHash.Keys | Select-Object -ExpandProperty BaseName) -join "`n")"
     $ModuleHash
-    Write-Debug "Exiting $($MyInvocation.MyCommand)"
-}
-
-function Load-AD {
-    # no targets provided so we'll query AD to build it, need to load the AD module
-    Write-Debug "Entering $($MyInvocation.MyCommand)"
-    if (Get-Module -ListAvailable | ? { $_.Name -match "ActiveDirectory" }) {
-        $Error.Clear()
-        Import-Module ActiveDirectory
-        if ($Error) {
-            "ERROR: Could not load the required Active Directory module. Please install the Remote Server Administration Tool for AD. Quitting." | Add-Content -Encoding $Encoding $ErrorLog
-            $Error.Clear()
-            Exit
-        }
-    } else {
-        "ERROR: Could not load the required Active Directory module. Please install the Remote Server Administration Tool for AD. Quitting." | Add-Content -Encoding $Encoding $ErrorLog
-        $Error.Clear()
-        Exit
-    }
     Write-Debug "Exiting $($MyInvocation.MyCommand)"
 }
 
@@ -1206,9 +1169,8 @@ if ($TargetList) {
 } elseif ($Target) {
     $Targets = $Target
 } else {
-    Write-Verbose "No Targets specified. Building one requires RAST and will take some time."
-    [void] (Load-AD)
-    $Targets  = Get-Targets -TargetCount $TargetCount
+    Write-Host "Error: No Targets specified: use -Target <name> or -TargetList <file>"
+    exit
 }
 # Done getting targets #
 

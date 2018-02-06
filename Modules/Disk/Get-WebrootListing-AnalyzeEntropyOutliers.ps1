@@ -9,7 +9,6 @@ ranks the output; this can be overwritten with the -NoStacking flag.
 Requires logparser.exe in your path.
 .NOTES
 OUTPUT TSV
-DATADIR WebrootListing
 #>
 
 Param(
@@ -102,6 +101,8 @@ if (-Not (Get-Command logparser.exe)) {
     Write-Host "${ScriptName} requires logparser.exe in the path."
     return
 }
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
     
 $lp_query = @"
     SELECT

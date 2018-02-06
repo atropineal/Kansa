@@ -7,10 +7,8 @@ Pulls frequency of autoruns based on ImagePath, LaunchString and MD5 tuple
 where the publisher is not verified (unsigned code) and the ImagePath is
 not 'File not found'
 
-This script expects files matching the *autorunsc.txt pattern to be in the
+This script expects files matching the *autorunsc.csv pattern to be in the
 current working directory.
-.NOTES
-DATADIR Autorunsc
 #>
 
 if (-Not (Test-Path -Path "*-autorunsc.csv")) {
@@ -22,6 +20,8 @@ if (-Not (Get-Command logparser.exe)) {
     Write-Host "${ScriptName} requires logparser.exe in the path."
     return
 } 
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
 $lpquery = @"
     SELECT

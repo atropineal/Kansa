@@ -9,10 +9,8 @@ ImagePath is not 'File not found'
 This one also includes the time stamp, which may break aggregation, but
 provides some useful information.
 
-This script expects files matching the *autorunsc.txt pattern to be in
+This script expects files matching the *autorunsc.csv pattern to be in
 the current working directory.
-.NOTES
-DATADIR Autorunsc
 #>
 
 if (-Not (Test-Path -Path "*-autorunsc.csv")) {
@@ -24,6 +22,8 @@ if (-Not (Get-Command logparser.exe)) {
     Write-Host "${ScriptName} requires logparser.exe in the path."
     return
 }
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
 $lpquery = @"
     SELECT

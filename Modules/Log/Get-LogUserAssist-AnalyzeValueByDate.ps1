@@ -6,8 +6,6 @@ Returns UserAssist data sorted by KeyLastWritetime descending
 
 This script expects files matching the *LogUserAssist.tsv pattern to be in the
 current working directory.
-.NOTES
-DATADIR LogUserAssist
 #>
 
 
@@ -20,6 +18,8 @@ if (-Not (Get-Command logparser.exe)) {
     Write-Host "${ScriptName} requires logparser.exe in the path."
     return
 }
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
 $lpquery = @"
     SELECT

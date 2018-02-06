@@ -17,9 +17,13 @@ a pathname without double-quotes. A superficial difference.
 Get-Autorunsc.ps1 provides much of the same information, but
 Get-SvcAll.ps1 shows Process Ids for running processes and tells
 you which account the item is running under.
-.NOTES
-DATADIR SvcAll
 #>
+
+if (-Not (Test-Path -Path "*svcall.xml")) {
+    return
+}
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
 $data = $null
 

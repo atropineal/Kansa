@@ -4,10 +4,8 @@ Get-SvcTrigStack.ps1
 Requires logparser.exe in path
 Pulls stack rank of Service Triggers from acquired Service Trigger data
 
-This script expects files matching the pattern *svctrigs.tsv to be in 
+This script expects files matching the pattern *svctrigs.csv to be in 
 the current working directory.
-.NOTES
-DATADIR SvcTrigs
 #>
 
 if (-Not (Test-Path -Path "*svctrigs.csv")) {
@@ -19,6 +17,8 @@ if (-Not (Get-Command logparser.exe)) {
     Write-Host "${ScriptName} requires logparser.exe in the path."
     return
 }
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
 $lpquery = @"
     SELECT

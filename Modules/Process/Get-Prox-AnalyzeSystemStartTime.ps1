@@ -6,9 +6,13 @@ Pulls the StartTime for the System process for each host,
 sort the data for all hosts.
 
 Process data matching *Prox.xml in pwd
-.NOTES
-DATADIR Prox
 #>
+
+if (-Not (Test-Path -Path "*Prox.xml")) {
+    return
+}
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
 $(foreach($file in (ls *Prox.xml)) {
     $data = Import-Clixml $file

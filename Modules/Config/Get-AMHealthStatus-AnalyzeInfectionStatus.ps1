@@ -9,8 +9,6 @@ RecentlyCleanedDetections, SchemaVersion
 
 Requires:
 Process data matching *AMInfectionStatus.tsv in pwd logparser.exe in path
-.NOTES
-DATADIR AMHealthStatus
 #>
 
 if (-Not (Test-Path -Path "*AMInfectionStatus.tsv")) {
@@ -22,6 +20,8 @@ if (-Not (Get-Command logparser.exe)) {
     Write-Host "${ScriptName} requires logparser.exe in the path."
     return
 }
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
 $lpquery = @"
     SELECT count (

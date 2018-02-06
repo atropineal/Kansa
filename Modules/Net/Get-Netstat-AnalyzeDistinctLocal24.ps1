@@ -20,6 +20,8 @@ if (-Not (Get-Command logparser.exe)) {
     return
 }
 
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
+
 $lpquery = @"
     SELECT
         Distinct substr(ForeignAddress, 0, last_index_of(ForeignAddress, '.')) as Local/24

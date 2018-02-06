@@ -8,8 +8,6 @@ on collected Get-PrefetchListing data.
 This script exepcts files matching the pattern 
 *PrefetchListing.tsv to be in the current working
 directory
-.NOTES
-DATADIR PrefetchListing
 #>
 
 if (-Not (Test-Path -Path "*PrefetchListing.tsv")) {
@@ -21,6 +19,8 @@ if (-Not (Get-Command logparser.exe)) {
     Write-Host "${ScriptName} requires logparser.exe in the path."
     return
 }
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
 $lpquery = @"
     SELECT

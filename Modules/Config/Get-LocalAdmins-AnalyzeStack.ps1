@@ -4,10 +4,8 @@ Get-LocalAdminStack.ps1
 Requires logparser.exe in path
 Pulls frequency of local admin account entries
 
-This script expects files matching the *LocalAdmins.tsv pattern to be in the
+This script expects files matching the *LocalAdmins.csv pattern to be in the
 current working directory.
-.NOTES
-DATADIR LocalAdmins
 #>
 
 if (-Not (Test-Path -Path "*LocalAdmins.csv")) {
@@ -19,6 +17,8 @@ if (-Not (Get-Command logparser.exe)) {
     Write-Host "${ScriptName} requires logparser.exe in the path."
     return
 }
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
 $lpquery = @"
     SELECT

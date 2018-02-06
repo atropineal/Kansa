@@ -7,8 +7,6 @@ Returns process CreationDate, ProcessId, ParentProcessId, CommandLine
 Requires:
 Process data matching *ProcWMI.tsv in pwd
 logparser.exe in path
-.NOTES
-DATADIR ProcsWMI
 #>
 
 if (-Not (Test-Path -Path "*ProcsWMI.tsv")) {
@@ -20,6 +18,8 @@ if (-Not (Get-Command logparser.exe)) {
     Write-Host "${ScriptName} requires logparser.exe in the path."
     return
 }
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
 $lpquery = @"
     SELECT DISTINCT

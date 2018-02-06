@@ -4,10 +4,8 @@ Get-SvcFailStack.ps1
 Requires logparser.exe in path
 Pulls stack rank of all Service Failures from acquired Service Failure data
 
-This script expects files matching the pattern *SvcFail.tsv to be in 
+This script expects files matching the pattern *SvcFail.csv to be in 
 the current working directory.
-.NOTES
-DATADIR SvcFail
 #>
 
 if (-Not (Test-Path -Path "*SvcFail.csv")) {
@@ -19,6 +17,8 @@ if (-Not (Get-Command logparser.exe)) {
     Write-Host "${ScriptName} requires logparser.exe in the path."
     return
 } 
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
 $lpquery = @"
     SELECT

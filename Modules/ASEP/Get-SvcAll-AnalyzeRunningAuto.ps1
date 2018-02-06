@@ -3,9 +3,13 @@
 Get-SvcAllRunningAuto.ps1
 Parses through the Get-SvcAll.ps1 data and returns
 those items that are running or set to start automatically.
-.NOTES
-DATADIR SvcAll
 #>
+
+if (-Not (Test-Path -Path "*svcall.xml")) {
+    return
+}
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
 $data = $null
 

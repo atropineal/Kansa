@@ -23,8 +23,6 @@ from the query...
 This script exepcts files matching the pattern 
 *netstat.csv to be in the current working
 directory
-.NOTES
-DATADIR Netstat
 #>
 
 if (-Not (Test-Path -Path "*netstat.csv")) {
@@ -36,6 +34,8 @@ if (-Not (Get-Command logparser.exe)) {
     Write-Host "${ScriptName} requires logparser.exe in the path."
     return
 }
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
 $lpquery = @"
     SELECT

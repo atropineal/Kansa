@@ -13,9 +13,13 @@ the Pathnames are the same for both of them.
 
 Get-Autorunsc.ps1 output provides much of this same information,
 but it doesn't tell you the account a service will run under.
-.NOTES
-DATADIR SvcAll
 #>
+
+if (-Not (Test-Path -Path "*svcall.xml")) {
+    return
+}
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
 $data = $null
 

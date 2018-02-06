@@ -6,8 +6,6 @@ Pulls frequency of ARP based on IpAddr
 
 This script expects files matching the *Arp.csv pattern to be in the
 current working directory.
-.NOTES
-DATADIR Arp
 #>
 
 if (-Not (Test-Path -Path "*arp.csv")) {
@@ -19,6 +17,8 @@ if (-Not (Get-Command logparser.exe)) {
     Write-Host "${ScriptName} requires logparser.exe in the path."
     return
 }
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
 $lpquery = @"
     SELECT

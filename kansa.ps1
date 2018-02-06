@@ -544,11 +544,6 @@ Directives are used for two things:
 binary and what the name of the binary is. If Kansa is called with 
 -PushBin, the script will look in Modules\bin\ for the binary and 
 attempt to copy it to targets.
-2) The DATADIR directive tells Kansa what the output path is for
-the given module's data so that if it is called with the -Analysis
-flag, the analysis scripts can find the data.
-TK Some collector output paths are dynamically generated based on
-arguments, so this breaks for analysis. Solve.
 #>
 Param(
     [Parameter(Mandatory=$True,Position=0)]
@@ -569,9 +564,6 @@ Param(
         Get-Content $Module | Select-String -CaseSensitive -Pattern "BINDEP|DATADIR" | Foreach-Object { $Directive = $_
             if ( $Directive -match "(^BINDEP|^# BINDEP) (.*)" ) {
                 $DirectiveHash.Add("BINDEP", $($matches[2]))
-            }
-            if ( $Directive -match "(^DATADIR|^# DATADIR) (.*)" ) {
-                $DirectiveHash.Add("DATADIR", $($matches[2])) 
             }
         }
         $DirectiveHash
@@ -1087,17 +1079,17 @@ Param(
         $AnalysisOutPath = $OutputPath + "\AnalysisReports\"
         [void] (New-Item -Path $AnalysisOutPath -ItemType Directory -Force)
 
-        # Get our DATADIR directive
+#        # Get our DATADIR directive
         $DirectivesHash  = @{}
         $AnalysisScripts | Foreach-Object { $AnalysisScript = $_
             $DirectivesHash = Get-Directives $AnalysisScript -AnalysisPath
-            $DataDir = $($DirectivesHash.Get_Item("DATADIR"))
+#            $DataDir = $($DirectivesHash.Get_Item("DATADIR"))
 #            if ($DataDir) {
 #                if (Test-Path "$OutputPath$DataDir") {
                     Push-Location
 #                    Set-Location "$OutputPath$DataDir"
                     Set-Location "$OutputPath"
-                    Write-Verbose "Running analysis script: ${AnalysisScript}"
+#                    Write-Verbose "Running analysis script: ${AnalysisScript}"
                     $AnalysisFile = ((((($AnalysisScript -split "\\")[1]) -split "Get-")[1]) -split ".ps1")[0]
                     # As of this writing, all analysis output files are tsv
                     & "$StartingPath\Modules\${AnalysisScript}" | Set-Content -Encoding $Encoding ($AnalysisOutPath + $AnalysisFile + ".tsv")

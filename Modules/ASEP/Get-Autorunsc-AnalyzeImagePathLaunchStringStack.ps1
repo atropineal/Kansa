@@ -5,10 +5,8 @@ Requires logparser.exe in path
 Pulls frequency of autoruns based on ImagePath, LaunchString tuple
 where ImagePath is not 'File not found'
 
-This script expects files matching the pattern *autorunsc.txt to be in the
+This script expects files matching the pattern *autorunsc.csv to be in the
 current working directory.
-.NOTES
-DATADIR Autorunsc
 #>
 
 if (-Not (Test-Path -Path "*-autorunsc.csv")) {
@@ -20,6 +18,8 @@ if (-Not (Get-Command logparser.exe)) {
     Write-Host "${ScriptName} requires logparser.exe in the path."
     return
 }
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
 $lpquery = @"
     SELECT

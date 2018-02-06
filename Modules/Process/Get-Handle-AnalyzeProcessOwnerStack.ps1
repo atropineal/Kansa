@@ -7,8 +7,6 @@ Pulls frequency from Get-Handle data based on ProcessName and Owner
 Requirements:
 logparser.exe in path
 Handle data matching *Handle.tsv in pwd
-.NOTES
-DATADIR Handle
 #>
 
 if (-Not (Test-Path -Path "*Handle.tsv")) {
@@ -20,6 +18,8 @@ if (-Not (Get-Command logparser.exe)) {
     Write-Host "${ScriptName} requires logparser.exe in the path."
     return
 }
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
 $lpquery = @"
     SELECT

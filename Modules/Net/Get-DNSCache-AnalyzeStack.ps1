@@ -6,8 +6,6 @@ Pulls frequency of DNSCache entries
 
 This script expects files matching the *DNSCache.csv pattern to be in the
 current working directory.
-.NOTES
-DATADIR DNSCache
 #>
 
 if (-Not (Test-Path -Path "*DNSCache.csv")) {
@@ -19,6 +17,8 @@ if (-Not (Get-Command logparser.exe)) {
     Write-Host "${ScriptName} requires logparser.exe in the path."
     return
 }
+
+Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
 $lpquery = @"
     SELECT

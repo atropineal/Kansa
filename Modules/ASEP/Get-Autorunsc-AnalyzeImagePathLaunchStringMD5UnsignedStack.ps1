@@ -13,7 +13,7 @@ current working directory.
 DATADIR Autorunsc
 #>
 
-if (-Not (Test-Path -Path "*-autorunsc.txt")) {
+if (-Not (Test-Path -Path "*-autorunsc.csv")) {
     return
 }
 

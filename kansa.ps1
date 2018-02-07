@@ -17,7 +17,7 @@ write the output to a folder named for each module in a time stamped
 output path. Each target will have its data written to separate files.
 
 For example, the Get-PrefetchListing.ps1 module data will be written
-to Output_timestamp\PrefetchListing\Hostname-PrefetchListing.txt.
+to Output\<timestamp>\Hostname-PrefetchListing.txt.
 
 All modules should return Powershell objects. Kansa converts those
 objects into one of several file formats, including csv, json, tsv and
@@ -33,13 +33,6 @@ http://trustedsignal.blogspot.com/2014/04/kansa-modular-live-response-tool-for.h
 The script assumes you will have administrator level privileges on
 target hosts, though such privileges may not be required by all 
 modules.
-
-If you run this script without the -TargetList argument, Remote Server
-Administration Tools (RSAT), is required. These are available from 
-Microsoft's Download Center for Windows 7 and 8. You can search for 
-RSAT at:
-
-http://www.microsoft.com/en-us/download/default.aspx
 
 .PARAMETER ModulePath
 An optional parameter, default value is .\Modules\, that specifies the
@@ -66,8 +59,8 @@ An optional credential that the script will use for execution. Use the
 $Credential = Get-Credential convention to populate a suitable variable.
 
 .PARAMETER Pushbin
-An optional flag that causes Kansa to push required binaries to the 
-ADMIN$ shares of targets. Modules that require third-party binaries, 
+An optional flag that causes Kansa to push required binaries to the
+%windir%\kansa shares of targets. Modules that require third-party binaries, 
 must include the "BINDEP <binary>" directive.
 
 For example, the Get-AutorunscDeep.ps1 collector has a dependency on
@@ -156,8 +149,7 @@ You cannot pipe objects to this cmdlet
 Various and sundry.
 
 .NOTES
-In the absence of a configuration file, specifying which modules to run, 
-this script will run each module across all hosts.
+The script requires either a -Target or a -TargetList argument.
 
 Each module should return objects.
 
@@ -177,18 +169,7 @@ The script can take a list of targets, read from a text file, via the
 argument to limit how many hosts will be targeted. To target a single
 host, use the -Target <hostname> argument.
 
-In the absence of the -TargetList or -Target arguments, Kansa.ps1 will
-query Acitve Directory for a complete list of hosts and will attempt to
-target all of them. 
-
 .EXAMPLE
-Kansa.ps1
-In the above example the user has specified no arguments, which will
-cause Kansa to run modules per the .\Modules\Modules.conf file against
-a list of hosts that it is able to query from Active Directory. Errors
-and all output will be written to a timestamped output directory. If
-.\Modules\Modules.conf is not found, all ps1 scripts starting with Get-
-under the .\Modules\ directory (recursively) will be run.
 .EXAMPLE
 Kansa.ps1 -TargetList hosts.txt -Credential $Credential -Transcribe
 In this example the user has specified a list of hosts to target, a 
@@ -201,15 +182,8 @@ In this example -ModulePath refers to a specific module that takes a
 positional parameter (only positional parameters are supported) and the
 script is being run against a single target.
 .EXAMPLE
-Kansa.ps1 -TargetList hostlist -Analysis
-Runs collection according to the configuration in Modules\Modules.conf.
-Following collection, runs analysis scripts per Analysis\Analysis.conf.
-.EXAMPLE
 Kansa.ps1 -ListModules
 Returns a list of all the modules found under the default modules path.
-.EXAMPLE
-Kansa.ps1 -ListAnalysis
-Returns a list of all analysis scripts found under the Analysis path.
 #>
 [CmdletBinding()]
 Param(
@@ -386,10 +360,8 @@ Param(
             } else {
                 # module found add it and its arguments to the $ModuleHash
                 $ModuleHash.Add((ls $ModPath), $Moduleargs)
-                # $FoundModules += ls $ModPath # deprecated code, remove after testing
             }
         }
-        # $Modules = $FoundModules # deprecated, remove after testing
     } else {
         # we had no modules.conf
         ls -r "${ModulePath}\Get-*.ps1" | Foreach-Object { $Module = $_
@@ -437,28 +409,8 @@ Param(
             $Targets = Get-Content $TargetList | Foreach-Object { $_.Trim() } | Where-Object { $_.Length -gt 0 } | Select-Object -First $TargetCount
         }
     } else {
-        # no target list provided, we'll query AD for it
-        Write-Verbose "`$TargetCount is ${TargetCount}."
-        if ($TargetCount -eq 0 -or $TargetCount -eq $Null) {
-            $Targets = Get-ADComputer -Filter * | Select-Object -ExpandProperty Name 
-        } else {
-            $Targets = Get-ADComputer -Filter * -ResultSetSize $TargetCount | Select-Object -ExpandProperty Name
-        }
-        # Iterate through targets, cleaning up AD Replication errors
-        # In some AD environments, when there are duplicate object names, AD will add the objectGUID to the Name
-        # displayed in the format of "hostname\0ACNF:ObjectGUID".  If you expand the property Name, you get 2 lines
-        # returned, the hostname, and then CNF:ObjectGUID. This code will look for hosts with more than one line and return
-        # the first line which is assumed to be the host name.
-        foreach ($item in $Targets) {
-            $numlines = $item | Measure-Object -Line
-            if ($numlines.Lines -gt 1) {
-                $lines = $item.Split("`n")
-                $i = [array]::IndexOf($targets, $item)
-                $targets[$i] = $lines[0]
-            }
-        }
-        $TargetList = "hosts.txt"
-        Set-Content -Path $TargetList -Value $Targets -Encoding $Encoding
+        Write-Hosts "Expected list of targets.. use -Target or -TargetList!"
+        exit
     }
 
     if ($Targets) {
@@ -888,7 +840,6 @@ function Send-File
 			}
 		}
 	}
-	
 }
 
 function Remove-Bindep {
@@ -896,9 +847,6 @@ function Remove-Bindep {
 .SYNOPSIS
 Attempts to remove binaries from targets when Kansa.ps1 is run with 
 -rmbin switch.
-ToDo: Fix this so it works even when Admin$ is not a valid share, as
-is the case with default Azure VM configuration. Maybe more reliable
-to Enter-PSSession for the host and Remove-Item.
 #>
 Param(
     [Parameter(Mandatory=$True,Position=0)]

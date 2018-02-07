@@ -25,7 +25,7 @@ binary that this script depends on.
 OUTPUT tsv
 BINDEP .\Modules\bin\Autorunsc.exe
 
-!!THIS SCRIPT ASSUMES AUTORUNSC.EXE WILL BE IN THE PATH SOMEWHERE!!
+!!THIS SCRIPT ASSUMES AUTORUNSC.EXE WILL BE IN THE PATH OF THE TARGET!!
 
 Autorunsc output is a mess. Some of it is quoted csv, some is just csv.
 This script parses it pretty well, but there are still some things that

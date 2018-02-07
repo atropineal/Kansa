@@ -32,8 +32,6 @@ C:\Users\foo\Documents\WindowsPowerShell\profile.ps1                            
 C:\Users\foo\Documents\WindowsPowerShell\Microsoft.PowerShell_...                  CurrentUserCurrentHost H4sIAAAAAAAEAMVabU/byBb+Xqn/YeRGwrnEXgJtt5cKqRBgiRZKRKBdLaDKsSfJ...
 #>
 
-
-
 function GetBase64GzippedStream {
 Param(
     [Parameter(Mandatory=$True,Position=0)]
@@ -76,21 +74,27 @@ Get-WmiObject win32_userprofile | ForEach-Object {
     $obj.SID  = $_.SID
     $obj.Name = GetName $_.LocalPath
     
-    if (Test-Path $obj.ProfilePath) {
+    if ($obj.ProfilePath -And (Test-Path $obj.ProfilePath)) {
         # Path is valid, get the content as a Base64 Encoded GZipped stream
         $obj.Script = GetBase64GzippedStream (Get-Item -Force $obj.ProfilePath)
     }
     $obj
 }
 
-"AllUsersAllHosts", "AllUsersCurrentHost", "CurrentUserAllHosts", "CurrentUserCurrentHost" | ForEach-Object {
+$Profile."AllUsersAllHosts", "AllUsersCurrentHost", "CurrentUserAllHosts", "CurrentUserCurrentHost" | ForEach-Object {
     $obj.ProfilePath,$obj.SID,$obj.Script,$obj.Name = $null
 
+    if ($profile.$_) {
+        continue
+    }
     $obj.ProfilePath = ($profile.$_)
     $obj.SID  = $null
     $obj.Name = $_
-    if (Test-Path $obj.ProfilePath) {
+
+    if ($obj.ProfilePath -And (Test-Path $obj.ProfilePath)) {
+        # Path is valid, get the content as a Base64 Encoded GZipped stream
         $obj.Script = GetBase64GzippedStream (Get-Item -Force $obj.ProfilePath)
     }
+
     $obj
 }

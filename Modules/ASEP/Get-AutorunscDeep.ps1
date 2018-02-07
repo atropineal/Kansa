@@ -26,7 +26,7 @@ This script does depend on Sysinternals' Autorunsc.exe, which is not
 packaged with Kansa. You will have to download it from Sysinternals and
 drop it in the .\Modules\bin\ directory. When you run Kansa.ps1, if you
 add the -Pushbin switch at the command line, Kansa.ps1 will attempt to 
-copy the Autorunsc.exe binary to each remote target's ADMIN$ share.
+copy the Autorunsc.exe binary to each remote target.
 
 If you want to remove the binary from remote systems after it has run,
 add the -rmbin switch to Kansa.ps1's command line.
@@ -42,7 +42,7 @@ binary that this script depends on.
 OUTPUT tsv
 BINDEP .\Modules\bin\Autorunsc.exe
 
-!!THIS SCRIPT ASSUMES AUTORUNSC.EXE WILL BE IN $ENV:SYSTEMROOT!!
+!!THIS SCRIPT ASSUMES AUTORUNSC.EXE WILL BE IN THE PATH OF THE TARGET!!
 #>
 
 
@@ -123,10 +123,10 @@ Param(
     }
 }
 
-if (Test-Path "$env:SystemRoot\Autorunsc.exe") {
+if (Get-Command "Autorunsc.exe") {
     # This regex matches all of the path types I've encountered, but there may be some it misses, if you find some, please send a sample to kansa@trustedsignal.com
     $fileRegex = New-Object System.Text.RegularExpressions.Regex "(([a-zA-Z]:|\\\\\w[ \w\.]*)(\\\w[- \w\.\\\{\}]*|\\%[ \w\.]+%+)+|%[ \w\.]+%(\\\w[ \w\.]*|\\%[ \w\.]+%+)*)"
-    & $env:SystemRoot\Autorunsc.exe /accepteula -a * -c -h -s '*' -nobanner 2> $null | ConvertFrom-Csv | ForEach-Object {
+    & Autorunsc.exe /accepteula -a * -c -h -s '*' -nobanner 2> $null | ConvertFrom-Csv | ForEach-Object {
         $_ | Add-Member NoteProperty ScriptMD5 $null
         $_ | Add-Member NoteProperty ScriptModTimeUTC $null
         $_ | Add-Member NoteProperty ShannonEntropy $null
@@ -163,5 +163,5 @@ if (Test-Path "$env:SystemRoot\Autorunsc.exe") {
         $_
     }
 } else {
-    Write-Error "Autorunsc.exe not found in $env:SystemRoot."
+    Write-Error "Autorunsc.exe not found in path..."
 }

@@ -14,6 +14,9 @@ foreach ($share in (Get-SmbShare))
 {
     $shareName = $share.Name
     Write-Verbose "Grabbing share rights for $shareName"
+    if (!$share.Path) {
+        continue
+    }
     $shareOwner = (Get-Acl -Path $share.Path).Owner
     
     $o = "" | Select-Object Share, Path, Source, User, Type, IsOwner, Full, Write, Read, Other

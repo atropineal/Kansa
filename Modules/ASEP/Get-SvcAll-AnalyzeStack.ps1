@@ -19,16 +19,33 @@ Get-SvcAll.ps1 shows Process Ids for running processes and tells
 you which account the item is running under.
 #>
 
-if (-Not (Test-Path -Path "*svcall.xml")) {
+if (-Not (Test-Path -Path "*svcall.csv")) {
     return
 }
 
+if (-Not (Get-Command logparser.exe)) {
+    $ScriptName = [System.IO.Path]::GetFileName($MyInvocation.ScriptName)
+    Write-Host "${ScriptName} requires logparser.exe in the path."
+    return
+} 
+
 Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
-$data = $null
-
-foreach ($file in (ls *svcall.xml)) {
-    $data += Import-Clixml $file
-}
-
-$data | Select-Object Caption, Pathname | Sort-Object Caption, Pathname | Group-Object Caption, Pathname | Sort-Object Name
+$lpquery = @"
+    SELECT
+        COUNT(Name,PathName,DisplayName) as ct,
+        Name,
+        PathName,
+        StartMode,
+        DisplayName
+    FROM
+        *svcall.csv
+    GROUP BY
+        Name,
+        PathName,
+        StartMode,
+        DisplayName
+    ORDER BY
+        ct ASC
+"@
+& logparser -stats:off -i:csv -dtlines:0 -rtp:-1 "$lpquery"

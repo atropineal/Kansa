@@ -15,7 +15,7 @@ Requires:
 Process data matching *AMHealthStatus.tsv in pwd logparser.exe in path
 #>
 
-if (-Not (Test-Path -Path "*AMHealthStatus.tsv")) {
+if (-Not (Test-Path -Path "*AMHealthStatus.csv")) {
     return
 }
 
@@ -70,7 +70,7 @@ $lpquery = @"
         SchemaVersion,
         Version
     FROM
-        *AMHealthStatus.tsv
+        *AMHealthStatus.csv
     GROUP BY
         AntispywareEnabled, 
         AntispywareSignatureAge, 
@@ -95,5 +95,5 @@ $lpquery = @"
     ORDER BY
         CNT ASC
 "@
-& logparser -stats:off -i:csv -dtlines:0 -fixedsep:on -rtp:-1 "$lpquery"
+& logparser -stats:off -i:csv -dtlines:0 -rtp:-1 "$lpquery"
 

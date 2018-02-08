@@ -45,6 +45,6 @@ $lpquery = @"
         FailAction2,
         FailAction3
     ORDER BY
-        ct ASC
+        ct,ServiceName ASC
 "@
 & logparser -stats:off -i:csv -dtlines:0 -rtp:-1 $lpquery

@@ -11,7 +11,8 @@ OUTPUT tsv
 $data = & $env:windir\system32\sc query | ForEach-Object {
     $svc = $_
     if ($svc -match "SERVICE_NAME:\s(.*)") { 
-        & $env:windir\system32\sc qfailure $($matches[1])
+        # without a buffer size being specified, sc qfailure fails with 'Insufficient buffer size returned'
+        & $env:windir\system32\sc qfailure $($matches[1]) 4096
     }
 }
 

@@ -30,6 +30,6 @@ $lpquery = @"
     GROUP BY
         CmdLineLC
     ORDER BY
-        ct ASC
+        ct,CmdLineLC ASC
 "@
 & logparser -stats:off -i:csv -dtlines:0 -rtp:-1 $lpquery

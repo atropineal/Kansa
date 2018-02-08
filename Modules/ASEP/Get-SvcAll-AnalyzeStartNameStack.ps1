@@ -15,16 +15,33 @@ Get-Autorunsc.ps1 output provides much of this same information,
 but it doesn't tell you the account a service will run under.
 #>
 
-if (-Not (Test-Path -Path "*svcall.xml")) {
+if (-Not (Test-Path -Path "*svcall.csv")) {
     return
 }
 
+if (-Not (Get-Command logparser.exe)) {
+    $ScriptName = [System.IO.Path]::GetFileName($MyInvocation.ScriptName)
+    Write-Host "${ScriptName} requires logparser.exe in the path."
+    return
+} 
+
 Write-Host Running $(Split-Path $PSCommandPath -Leaf)
 
-$data = $null
-
-foreach ($file in (ls *svcall.xml)) {
-    $data += Import-Clixml $file
-}
-
-$data | Select-Object Caption, StartName | Sort-Object Caption, StartName | Group-Object Caption, StartName | Sort-Object Name
+$lpquery = @"
+    SELECT
+        COUNT(Name,PathName,DisplayName) as ct,
+        Name,
+        StartName,
+        PathName,
+        DisplayName
+    FROM
+        *svcall.csv
+    GROUP BY
+        Name,
+        StartName,
+        PathName,
+        DisplayName
+    ORDER BY
+        ct ASC
+"@
+& logparser -stats:off -i:csv -dtlines:0 -rtp:-1 "$lpquery"

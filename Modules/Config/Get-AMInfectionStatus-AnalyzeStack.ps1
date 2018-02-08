@@ -11,7 +11,7 @@ Requires:
 Process data matching *AMInfectionStatus.tsv in pwd logparser.exe in path
 #>
 
-if (-Not (Test-Path -Path "*AMInfectionStatus.tsv")) {
+if (-Not (Test-Path -Path "*AMInfectionStatus.csv")) {
     return
 }
 
@@ -42,7 +42,7 @@ $lpquery = @"
         RecentlyCleanedDetections, 
         SchemaVersion
     FROM
-        *AMInfectionStatus.tsv
+        *AMInfectionStatus.csv
     GROUP BY
         ComputerStatus, 
         CriticallyFailedDetections, 
@@ -55,4 +55,4 @@ $lpquery = @"
     ORDER BY
         CNT ASC
 "@
-& logparser -stats:off -i:csv -dtlines:0 -fixedsep:on -rtp:-1 "$lpquery"
+& logparser -stats:off -i:csv -dtlines:0 -rtp:-1 "$lpquery"

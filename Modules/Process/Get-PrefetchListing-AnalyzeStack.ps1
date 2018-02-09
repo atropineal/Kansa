@@ -10,7 +10,7 @@ This script exepcts files matching the pattern
 directory
 #>
 
-if (-Not (Test-Path -Path "*PrefetchListing.tsv")) {
+if (-Not (Test-Path -Path "*PrefetchListing.csv")) {
     return
 }
 
@@ -27,11 +27,11 @@ $lpquery = @"
         COUNT(FullName) as CT,
         FullName
     FROM
-        *PrefetchListing.tsv
+        *PrefetchListing.csv
     GROUP BY
         FullName
     ORDER BY
         ct
 "@
 
-& logparser -stats:off -i:csv -fixedsep:on -dtlines:0 -rtp:-1 $lpquery
+& logparser -stats:off -i:csv -dtlines:0 -rtp:-1 $lpquery

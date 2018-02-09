@@ -7,11 +7,11 @@ PSComputerName for any processes with ExecutablePaths containing Temp, Tmp or
 AppData\Local, common temporary folders
 
 Requires:
-Process data matching *ProcWMI.tsv in pwd
+Process data matching *ProcWMI.csv in pwd
 logparser.exe in path
 #>
 
-if (-Not (Test-Path -Path "*ProcsWMI.tsv")) {
+if (-Not (Test-Path -Path "*ProcsWMI.csv")) {
     return
 }
 
@@ -32,7 +32,7 @@ $lpquery = @"
         CommandLine,
         PSComputerName
     FROM
-        *ProcsWMI.tsv
+        *ProcsWMI.csv
     WHERE
         ExecutablePath like '%Temp%' or
         ExecutablePath like '%Tmp%' or
@@ -42,4 +42,4 @@ $lpquery = @"
         CreationDate,
         ProcessId ASC
 "@
-& logparser -stats:off -i:csv -dtlines:0 -fixedsep:on -rtp:-1 "$lpquery"
+& logparser -stats:off -i:csv -dtlines:0 -rtp:-1 "$lpquery"

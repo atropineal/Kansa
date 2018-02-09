@@ -5,11 +5,11 @@ Get-ProcsWMICmdLineStack.ps1
 Pulls frequency of processes based on path CommandLine
 
 Requires:
-Process data matching *ProcWMI.tsv in pwd
+Process data matching *ProcWMI.csv in pwd
 logparser.exe in path
 #>
 
-if (-Not (Test-Path -Path "*ProcsWMI.tsv")) {
+if (-Not (Test-Path -Path "*ProcsWMI.csv")) {
     return
 }
 
@@ -26,10 +26,10 @@ $lpquery = @"
         COUNT(CommandLine) as ct,
         CommandLine
     FROM
-        *ProcsWMI.tsv
+        *ProcsWMI.csv
     GROUP BY
         CommandLine
     ORDER BY
         ct ASC
 "@
-& logparser -stats:off -i:csv -dtlines:0 -fixedsep:on -rtp:-1 "$lpquery"
+& logparser -stats:off -i:csv -dtlines:0 -rtp:-1 "$lpquery"

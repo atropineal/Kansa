@@ -2,7 +2,7 @@
 .SYNOPSIS
 Get-Handle acquires handle data using sysinternals handle.exe
 
-!!THIS SCRIPT ASSUMES HANDLE.EXE WILL BE IN $ENV:SYSTEMROOT!!
+!!THIS SCRIPT ASSUMES HANDLE.EXE WILL BE IN THE PATH!!
 
 If you have handle.exe in your Modules\bin\ path and run the script with the -Pushbin
 flag, Kansa will attempt to copy the binary to the ADMIN$. Binaries are not removed, so
@@ -19,8 +19,8 @@ BINDEP .\Modules\bin\Handle.exe
 #>
 
 
-if (Test-Path "$env:SystemRoot\handle.exe") {
-    $data = (& $env:SystemRoot\handle.exe /accepteula -a)
+if (Get-Command "handle.exe") {
+    $data = (& handle.exe /accepteula -a)
     #("Process","PId","Owner","Type","Perms","Name") -join $Delimiter
     foreach($line in $data) {
         $line = $line.Trim()
@@ -60,5 +60,5 @@ if (Test-Path "$env:SystemRoot\handle.exe") {
     }
 
 } else {
-    Write-Error "Handle.exe not found in $env:SystemRoot."
+    Write-Error "Handle.exe not found in PATH..."
 }

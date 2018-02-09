@@ -9,7 +9,7 @@ logparser.exe in path
 Handle data matching *Handle.tsv in pwd
 #>
 
-if (-Not (Test-Path -Path "*Handle.tsv")) {
+if (-Not (Test-Path -Path "*Handle.csv")) {
     return
 }
 
@@ -28,11 +28,11 @@ $lpquery = @"
         ProcessName,
         Owner
     FROM
-        *Handle.tsv
+        *Handle.csv
     GROUP BY
         ProcessName,
         Owner
     ORDER BY
         ct ASC
 "@
-& logparser -stats:off -i:csv -dtlines:0 -fixedsep:on -rtp:-1 "$lpquery"
+& logparser -stats:off -i:csv -dtlines:0 -rtp:-1 "$lpquery"

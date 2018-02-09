@@ -7,11 +7,11 @@ ExecutablePath and command line arguments and hash
 of file on disk
 
 Requires:
-Process data matching *ProcWMI.tsv in pwd
+Process data matching *ProcWMI.csv in pwd
 logparser.exe in path
 #>
 
-if (-Not (Test-Path -Path "*ProcsWMI.tsv")) {
+if (-Not (Test-Path -Path "*ProcsWMI.csv")) {
     return
 }
 
@@ -29,11 +29,11 @@ $lpquery = @"
         CommandLine,
         Hash
     FROM
-        *ProcsWMI.tsv
+        *ProcsWMI.csv
     GROUP BY
         CommandLine,
         Hash
     ORDER BY
         Cnt ASC
 "@
-& logparser -stats:off -i:csv -dtlines:0 -fixedsep:on -rtp:-1 "$lpquery"
+& logparser -stats:off -i:csv -dtlines:0 -rtp:-1 "$lpquery"

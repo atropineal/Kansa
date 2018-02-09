@@ -5,11 +5,11 @@ Get-ProcsWMISortByStartTime.ps1
 Returns process CreationDate, ProcessId, ParentProcessId, CommandLine
 
 Requires:
-Process data matching *ProcWMI.tsv in pwd
+Process data matching *ProcWMI.csv in pwd
 logparser.exe in path
 #>
 
-if (-Not (Test-Path -Path "*ProcsWMI.tsv")) {
+if (-Not (Test-Path -Path "*ProcsWMI.csv")) {
     return
 }
 
@@ -29,10 +29,10 @@ $lpquery = @"
         CommandLine,
         PSComputerName
     FROM
-        *ProcsWMI.tsv
+        *ProcsWMI.csv
     ORDER BY
         PSComputerName,
         CreationDate,
         ProcessId ASC
 "@
-& logparser -stats:off -i:csv -dtlines:0 -fixedsep:on -rtp:-1 "$lpquery"
+& logparser -stats:off -i:csv -dtlines:0 -rtp:-1 "$lpquery"

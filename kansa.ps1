@@ -248,6 +248,9 @@ if(!$Quiet) {
     $VerbosePreference = "Continue"
 }
 
+# Output Debug logging?
+#$DebugPreference = "Continue"
+
 function FuncTemplate {
 <#
 .SYNOPSIS

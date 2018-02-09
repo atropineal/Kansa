@@ -41,7 +41,7 @@ Param(
     [Parameter(Mandatory=$False,Position=2)]
         [String]$extRegex="\.(exe|sys|dll|ps1|psd1|psm1|vbs|bat|cmd)$",
     [Parameter(Mandatory=$False,Position=3)]
-        [int]$MinB=4096,
+        [int]$MinB=1,
     [Parameter(Mandatory=$False,Position=4)]
         [int]$MaxB=10485760
 ) 

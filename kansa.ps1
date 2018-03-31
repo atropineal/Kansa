@@ -864,7 +864,7 @@ Param(
     Write-Debug "Entering $($MyInvocation.MyCommand)"
     Write-Host $Targets
     Write-Host $Modules
-    Write-Host $Binde
+    Write-Host $Bindep
     $Error.Clear()
     $Bindep = $Bindep.Substring($Bindep.LastIndexOf("\") + 1)
     Write-Verbose "Attempting to remove ${Bindep} from remote hosts."
@@ -986,6 +986,8 @@ Param(
     Write-Debug "Exiting $($MyInvocation.MyCommand)"    
 } # End Get-Analysis
 
+Write-Verbose "Started $(Get-Date)"
+
 # Do not stop or report errors as a matter of course.   #
 # Instead write them out the error.log file and report  #
 # that there were errors at the end, if there were any. #
@@ -1084,6 +1086,14 @@ Get-TargetData -Targets $Targets -Modules $Modules -Credential $Credential -Thro
 # We always run all applicable analysis scripts #
 Get-Analysis $OutputPath $StartingPath
 # Done running analysis #
+
+# Code to remove binaries from remote hosts
+if ($rmbin) {
+    Remove-Bindep -Targets $Targets -Modules $Modules -Credential $Credential
+}
+# Done removing binaries #
+
+Write-Verbose "Finished $(Get-Date)"
 
 # Clean up #
 Exit

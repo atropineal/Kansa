@@ -208,7 +208,7 @@ Param(
         [Int]$ThrottleLimit=0,
     [Parameter(Mandatory=$False,Position=9)]
     [ValidateSet("Ascii","BigEndianUnicode","Byte","Default","Oem","String","Unicode","Unknown","UTF32","UTF7","UTF8")]
-        [String]$Encoding="Unicode",
+        [String]$Encoding="Ascii",
     [Parameter(Mandatory=$False,Position=10)]
         [Switch]$UpdatePath,
     [Parameter(Mandatory=$False,Position=11)]

@@ -40,19 +40,8 @@ Param(
     # Read profile into memory stream
     $memFile = New-Object System.IO.MemoryStream (,[System.IO.File]::ReadAllBytes($File))
         
-    # Create an empty memory stream to store our GZipped bytes in
-    $memStrm = New-Object System.IO.MemoryStream
-
-    # Create a GZipStream with $memStrm as its underlying storage
-    $gzStrm  = New-Object System.IO.Compression.GZipStream $memStrm, ([System.IO.Compression.CompressionMode]::Compress)
-
-    # Pass $memFile's bytes through the GZipstream into the $memStrm
-    $gzStrm.Write($memFile.ToArray(), 0, $File.Length)
-    $gzStrm.Close()
-    $gzStrm.Dispose()
-
     # Return Base64 Encoded GZipped stream
-    [System.Convert]::ToBase64String($memStrm.ToArray())   
+    [System.Convert]::ToBase64String($memFile.ToArray())   
 }
 
 function GetName {

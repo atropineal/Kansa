@@ -9,4 +9,4 @@ if (-Not (Get-Command logparser.exe)) {
 } 
 
 Write-Host Running $(Split-Path $PSCommandPath -Leaf)
-& logparser /q:on "select count(*) as ct,name,pathname,startmode,startname,caption from *svcall.csv where pathname not like '%svchost.exe%' group by name,pathname,startmode,startname,caption order by ct"
+& logparser /q:on "select pscomputername,name,pathname,startmode,startname,caption from *svcall.csv where description is null order by name"

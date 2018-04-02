@@ -1,4 +1,4 @@
-﻿if (-Not (Test-Path -Path "*svcall.csv")) {
+﻿if (-Not (Test-Path -Path "*WMIFilterConsumerBinding.csv")) {
     return
 }
 
@@ -9,4 +9,4 @@ if (-Not (Get-Command logparser.exe)) {
 } 
 
 Write-Host Running $(Split-Path $PSCommandPath -Leaf)
-& logparser /q:on "select count(*) as ct,name,pathname,startmode,startname,caption from *svcall.csv where pathname not like '%svchost.exe%' group by name,pathname,startmode,startname,caption order by ct"
+& logparser /q:on "select count(*) as ct,filter,consumer from *WMIFilterConsumerBinding.csv group by filter,consumer order by ct"

@@ -17,54 +17,6 @@ if(!$Quiet) {
     $VerbosePreference = "Continue"
 }
 
-function Get-Modules {
-Param(
-    [Parameter(Mandatory=$True,Position=0)]
-        [String]$ModulePath
-)
-    $Error.Clear()
-    $ModuleScript = ($ModulePath -split " ")[0]
-    $ModuleArgs   = @($ModulePath -split [regex]::escape($ModuleScript))[1].Trim()
-    $Modules = $FoundModules = @()
-    $ModuleHash = New-Object System.Collections.Specialized.OrderedDictionary
-    $ModuleHash.Add((ls $ModuleScript), $ModuleArgs)
-    $Module = ls $ModuleScript | Select-Object -ExpandProperty BaseName
-    Write-Verbose "Running module: $Module $ModuleArgs"
-    Return $ModuleHash
-}
-
-function Get-Targets {
-Param(
-    [Parameter(Mandatory=$False,Position=0)]
-        [String]$TargetList=$Null,
-    [Parameter(Mandatory=$False,Position=1)]
-        [int]$TargetCount=0
-)
-    $Error.Clear()
-    $Targets = $False
-    if ($TargetList) {
-        # user provided a list of targets
-        $Targets = Get-Content $TargetList | Foreach-Object { $_.Trim() } | Where-Object { $_.Length -gt 0 }
-    } else {
-        Write-Hosts "Expected list of targets.. use -Target or -TargetList!"
-        exit
-    }
-
-    if ($Targets) {
-        Write-Verbose "`$Targets are ${Targets}."
-        return $Targets
-    } else {
-        Write-Verbose "Get-Targets function found no targets. Checking for errors."
-    }
-    
-    if ($Error) { # if we make it here, something went wrong
-        $Error | Add-Content -Encoding $Encoding $ErrorLog
-        "ERROR: Get-Targets function could not get a list of targets. Quitting."
-        $Error.Clear()
-        Exit
-    }
-}
-
 function Get-TargetData {
 <#
 .SYNOPSIS
@@ -240,10 +192,18 @@ Write-Debug "`$ModulePath is ${ModulePath}."
 Write-Debug "`$OutputPath is ${OutputPath}."
 Write-Debug "`$ServerList is ${TargetList}."
 
-$Modules = Get-Modules -ModulePath $ModulePath
+$ModuleScript = ($ModulePath -split " ")[0]
+$ModuleArgs   = @($ModulePath -split [regex]::escape($ModuleScript))[1].Trim()
+$Modules = $FoundModules = @()
+$ModuleHash = New-Object System.Collections.Specialized.OrderedDictionary
+$ModuleHash.Add((ls $ModuleScript), $ModuleArgs)
+$Module = ls $ModuleScript | Select-Object -ExpandProperty BaseName
+Write-Verbose "Running module: $Module $ModuleArgs"
+
+$Modules = $ModuleHash
 
 if ($TargetList) {
-    $Targets = Get-Targets -TargetList $TargetList -TargetCount $TargetCount
+    $Targets = Get-Content $TargetList | Foreach-Object { $_.Trim() } | Where-Object { $_.Length -gt 0 }
 } elseif ($Target) {
     $Targets = $Target
 } else {

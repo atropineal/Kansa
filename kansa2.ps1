@@ -94,26 +94,6 @@ Param(
     
 }
 
-function Set-KansaPath {
-    $Error.Clear()
-    $Invocation = (Get-Variable MyInvocation -Scope 1).Value
-    $kansapath  = Split-Path $Invocation.MyCommand.Path
-    $Paths      = ($env:Path).Split(";")
-    if (-not($Paths -match [regex]::Escape("$kansapath\Modules"))) {
-        $env:Path = $env:Path + ";$kansapath\Modules"
-    }
-    $AnalysisPaths = (ls -Recurse "$kansapath\Modules" | Where-Object { $_.PSIsContainer } | Select-Object -ExpandProperty FullName)
-    $AnalysisPaths | ForEach-Object {
-        if (-not($Paths -match [regex]::Escape($_))) {
-            $env:Path = $env:Path + ";$_"
-        }
-    }
-    if ($Error) {
-        $Error | Add-Content -Encoding $Encoding $ErrorLog
-        $Error.Clear()
-    }
-}
-
 function Get-Analysis {
 <#
 .SYNOPSIS
@@ -186,7 +166,6 @@ if ($Exit) {
 }
 Write-Debug "Parameter sanity check complete."
 
-Set-KansaPath
 
 Write-Debug "`$ModulePath is ${ModulePath}."
 Write-Debug "`$OutputPath is ${OutputPath}."

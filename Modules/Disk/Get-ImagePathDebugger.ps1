@@ -1,0 +1,1 @@
+﻿Get-ChildItem 'HKLM:SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options' | get-itemproperty | select-object pspath,debugger | where-object debugger

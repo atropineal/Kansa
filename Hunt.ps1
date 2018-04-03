@@ -13,7 +13,7 @@ Write-Host "Started $(Get-Date)"
 $ErrorActionPreference = "SilentlyContinue"
 $StartingPath = Get-Location | Select-Object -ExpandProperty Path
 $Timestamp = ([String] (Get-Date -Format yyyy-MM-dd-HH-mm-ss))
-$OutputPath = $StartingPath + "\Output\$Timestamp\"
+$OutputPath = $StartingPath + "\output\$Timestamp\"
 
 [void] (New-Item -Path $OutputPath -ItemType Directory -Force) 
 Set-Variable -Name ErrorLog -Value ($OutputPath + "Error.Log") -Scope Script
@@ -48,7 +48,7 @@ if ($Error) {
 $ModuleName  = $Module | Select-Object -ExpandProperty BaseName
 $Arguments   = $ModuleArgs -split ","
 $Job = Invoke-Command -Session $PSSessions -FilePath $Module -ArgumentList $Arguments -AsJob -ThrottleLimit 0
-Write-Host "Waiting for $ModuleName $Arguments to complete."
+Write-Host "Waiting for $ModuleName to complete."
 Wait-Job $Job          
 
 $ModuleShortName = $($ModuleName -replace "Get-") 
@@ -65,19 +65,16 @@ $Job.ChildJobs | Foreach-Object { $ChildJob = $_
 Remove-Job $Job
 Remove-PSSession $PSSessions
 
-if (Get-Command -Name Logparser.exe) {
-    $AnalysisScripts = Get-ChildItem -Path "$StartingPath\Modules" -Depth 2 -Filter ($ModuleName + "-Analyze*.ps1") | % { $_.Directory.Name + "\" + $_.Name }
-    $AnalysisOutPath = $OutputPath + "\AnalysisReports\"
-    $AnalysisScripts | Foreach-Object { $AnalysisScript = $_
-        [void] (New-Item -Path $AnalysisOutPath -ItemType Directory -Force)
-        Push-Location
-        Set-Location "$OutputPath"
-        $AnalysisFile = ((((($AnalysisScript -split "\\")[1]) -split "Get-")[1]) -split ".ps1")[0]
-        & "$StartingPath\Modules\${AnalysisScript}" | Set-Content -Encoding $Encoding ($AnalysisOutPath + $AnalysisFile + ".tsv")
-        Pop-Location
-    }
-} else {
-    "Kansa could not find logparser.exe in path. Skipping Analysis." | Add-Content -$ErrorLog
+$AnalysisScripts = Get-ChildItem -Path "$StartingPath\modules" -Filter ($ModuleName + "-Analyze*.ps1") | % { $_.Directory.Name + "\" + $_.Name }
+$AnalysisOutPath = $OutputPath + "\AnalysisReports\"
+$AnalysisScripts | Foreach-Object { 
+    $AnalysisScript = $_
+    [void] (New-Item -Path $AnalysisOutPath -ItemType Directory -Force)
+    Push-Location
+    Set-Location "$OutputPath"
+    $AnalysisFile = ((((($AnalysisScript -split "\\")[1]) -split "Get-")[1]) -split ".ps1")[0]
+    & "$StartingPath\${AnalysisScript}" | Set-Content ($AnalysisOutPath + $AnalysisFile + ".tsv")
+    Pop-Location
 }
 
 Write-Host "Finished $(Get-Date)"
